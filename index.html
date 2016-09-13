@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>ThreeJS-3</title>
+    <script src="../libs/jquery-3.1.0/jquery-3.1.0.js"></script>
+    <script src="../libs/three.js"></script>
+    <script src="../libs/requestAnimationFrame/RequestAnimationFrame.js"></script>
+
+    <script type="text/javascript">
+        var renderer = null,
+                scene = null,
+                camera = null,
+                cube = null;
+
+        var duration = 5000; //ms
+        var currentTime = Date.now();
+        function animate() {
+            var now = Date.now();
+            var deltat = now - currentTime;
+            currentTime = now;
+            var fract = deltat / duration;
+            var angle = Math.PI * 2 * fract;
+            cube.rotation.y += angle;
+        }
+
+        function run() {
+            requestAnimationFrame(function() { run();});
+
+            // Render the scene
+            renderer.render(scene, camera);
+
+            // spin the cube for next frame
+            animate();
+        }
+
+        $(document).ready(
+                function() {
+                    var canvas = document.getElementById("webglcanvas");
+
+                    // create the three.js renderer and attach it to our canvas
+                    renderer = new THREE.WebGLRenderer(
+                            { canvas: canvas, antialias: true} );
+
+                    // set the viewport size
+                    renderer.setSize(canvas.width, canvas.height);
+
+                    // create a new three.js scene
+                    scene = new THREE.Scene();
+
+                    // Add a camera so we can view the scene
+                    camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 1, 4000);
+                    scene.add(camera);
+
+                    //add a directional light to show off the object
+                    var light = new THREE.DirectionalLight(0xffffff, 1.5);
+
+                    // position the light out from the scene, pointing at the origin
+                    light.position.set(0, 0, 1);
+                    scene.add(light);
+
+
+                    // create a texture-mapped cube and add it to the scene
+                    // first, create the texture map
+                    var mapUrl = "../images/webgl-logo-256.jpg";
+                    var loader = new THREE.TextureLoader();
+                    var material;
+                    loader.load(
+                            mapUrl,
+                            function(texture) {
+                                // now, create a Phong material; pass in the map
+                                material = new THREE.MeshPhongMaterial({map: texture});
+
+                                // create the cube geometry
+                                var geometry = new THREE.CubeGeometry(2, 2, 2);
+
+                                // and put the geometry and the material together into a mesh
+                                cube = new THREE.Mesh(geometry, material);
+
+                                // move the mesh back from the camera and tilt it toward the viewer
+                                cube.position.z = -8;
+                                cube.rotation.x = Math.PI / 5;
+                                cube.rotation.y = Math.PI / 5;
+
+                                // finally add the mesh to our scene
+                                scene.add(cube);
+
+                                // run the run loop
+                                run();
+
+                            }
+                    );
+
+
+                }
+        );
+
+    </script>
+
+</head>
+<body>
+    <div style="position: absolute;top: 50px; left: 50px;">
+        <canvas id="webglcanvas" style="border: none;background-color:#000000" width="900" height="900">
+            Your Browser does not support HTML5 Canvas - Use FireFox!
+        </canvas>
+    </div>
+</body>
+</html>
